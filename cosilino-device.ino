@@ -19,7 +19,7 @@
 #include <Servo.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "DHT.h"
+#include "DHTesp.h"
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiManager.h>
@@ -49,7 +49,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
-DHT dht(DHTPIN, DHTTYPE);
+DHTesp dht;
 
 int globalHeatRatio = 0;
 long lastMsg = 0;
@@ -70,7 +70,7 @@ void setup() {
     onlyGreenLed();
     delay(500);
 
-    dht.begin();
+    dht.setup(DHTPIN);
     client.setServer(MQTT_SERVER, 1883);
     client.setCallback(callback);
     setHeatRatio(50);
@@ -105,8 +105,8 @@ void configModeCallback(WiFiManager *myWiFiManager) {
 }
 
 void publishMessage() {
-    float roomHumidity = dht.readHumidity();     //Luftfeuchte auslesen
-    float roomTemperature = dht.readTemperature();  //Temperatur auslesen
+    float roomHumidity = dht.getHumidity();
+    float roomTemperature = dht.getTemperature();
 
     DS18B20.requestTemperatures();
     float heaterTemperature = DS18B20.getTempCByIndex(0);
@@ -120,7 +120,7 @@ void publishMessage() {
     Serial.print("Publish message: ");
     Serial.println(mqttMessage.c_str());
 
-    String outTopic = TOPIC_PREFIX + "/" + getDeviceId() + "/" + OUT_SUFFIX;
+    String outTopic = String(TOPIC_PREFIX) + "/" + getDeviceId() + "/" + OUT_SUFFIX;
     client.publish(outTopic.c_str(), mqttMessage.c_str());
 }
 
@@ -137,11 +137,11 @@ void setHeatRatio(int heatRatio) {
     globalHeatRatio = heatRatio;
 
     if (heatRatio > 66) {
-        red();
+        onlyRedLed();
     } else if (heatRatio > 33) {
-        yellow();
+        onlyYellowLed();
     } else {
-        green();
+        onlyGreenLed();
     }
 
     int servoDegree = heatRatioToDegree(heatRatio);
@@ -185,9 +185,9 @@ void reconnect() {
         // Attempt to connect
         if (client.connect("ESP8266Client")) {
             Serial.println("connected");
-            // Once connected, publish an announcement...
-            String myId = "Connecting Device: " + getDeviceId();
-            client.subscribe(IN_TOPIC);
+                       
+            String inTopic = String(TOPIC_PREFIX) + "/" + getDeviceId() + "/" + IN_SUFFIX;
+            client.subscribe(inTopic.c_str());
         } else {
             Serial.print("failed, rc=");
             Serial.print(client.state());
