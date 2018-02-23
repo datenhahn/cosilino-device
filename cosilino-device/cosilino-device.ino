@@ -11,10 +11,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * cosilino (device software)
+ *
+ * This program for the ESP8266 reads temperatures from a DS18B20 temperature
+ * sensor and a DHT-22 temperature and humidity sensor and allows to set
+ * a servo turn degree from 0-180 in percent. (180° == 100).
+ *
+ * A status is published every 10 seconds on a mqtt topic and the servo commands
+ * are read from a different topic.
  *
  * Author: Jonas Hahn <jonas.hahn@datenhahn.de>
- *
- */
+ * */
 
 #include <Servo.h>
 #include <OneWire.h>
@@ -34,7 +44,7 @@
 #define DHTPIN D3
 #define DHTTYPE DHT22 //DHT11, DHT21, DHT22
 
-/* other constants */
+/* general constants */
 #define MAX_SERVO_DEGREE 180
 #define TOPIC_PREFIX "cosilino"
 #define OUT_SUFFIX "status"
@@ -73,7 +83,7 @@ void setup() {
     dht.setup(DHTPIN);
     client.setServer(MQTT_SERVER, 1883);
     client.setCallback(callback);
-    setHeatRatio(50);
+    setHeatRatio(0);
 }
 
 
@@ -145,6 +155,7 @@ void setHeatRatio(int heatRatio) {
     }
 
     int servoDegree = heatRatioToDegree(heatRatio);
+
     String output =
             "Setting: ratio=" + String(heatRatio) + " degree=" + String(servoDegree) + "\n";
 
@@ -153,7 +164,7 @@ void setHeatRatio(int heatRatio) {
     /* It is important here to attach and detach the servo. Otherwise it would constantly try to adjust its position,
      * which results in a constant buzzing noise if it is not able to move fully to the desired position.
      */
-    servo.attach(SERVO_PIN);  // attaches the servo on pin 9 to the servo object
+    servo.attach(SERVO_PIN);
     delay(100);
     servo.write(servoDegree);
     delay(2000);
