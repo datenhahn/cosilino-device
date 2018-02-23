@@ -21,7 +21,21 @@ the heater and fiddling with its internals which I didn't want to do (too risky)
 
 The easy workaround was to just turn the max heat knob with a servo.
 
+I 3D-printed the part to hold the servo with a cheap 40€ 3D print
+pen which uses the normal 1,75mm PLA filament. It doesn't look nice
+but it does the job. It is connected to the heating with magnets
+(which I stole from my son's toy box).
+
+The device's casing is way too big. This is the first prototype, so
+I wanted to have some space to play around. Also I used an additional
+NodeMCU breakout-board which makes using normal bread-board-connectors
+ more convenient.
+
 ![Device installed](doc/images/device_installed.jpg)
+
+![Device installed](doc/images/device.jpg)
+
+![Device installed](doc/images/device_open.jpg)
 
 ### Watch in action
 
@@ -86,7 +100,7 @@ commenting out
 Then restart mongodb (`/etc/init.d/mongodb restart`)
 
 
-### Debugging
+### Get and set heat
 
 You can connect to all topics on the broker for debugging purposes.
 `-v` also prints the topic names.
@@ -103,8 +117,30 @@ to switch the heater on for 1-2 hours at night. In winter it is on
 all the time anyway and in summer off all the time. Of course a nice
 automatic adjustment using a weather forecast would be nice (see todo).
 
+Actually the percentage values aren't to helpful. In the end I controled
+the heat by how long I set the heater to 100% (which is actually 66% as
+the servo doesn't turn 270° but only 180°).
+
+For me 1-2 hours per night was enough during autum/spring.
+
     $> mosquitto_pub -t "cosilino/171d45/heaterpower" -m 0
     $> mosquitto_pub -t "cosilino/171d45/heaterpower" -m 100
+
+Example cronjobs
+
+```
+$> crontab -l
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+
+#0 21 * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 100
+#45 21 * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 0
+#10 1  * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 100
+#30 1  * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 0
+#40 4 * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 100
+#0 5 * * * mosquitto_pub -h cosilino-gateway -t cosilino/171d45/heaterpower -m 0
+```
 
 ### Pumping data into mongodb
 
@@ -129,6 +165,16 @@ which comes with raspbian is quite old (2.4..) .
 
 ![stats example](doc/images/mathplotlib-example.png)
 
+## Todo
+
+The real plan was to dynamically set the heat level depending on the
+next days weather and condition (sun/clouds).
+
+And of course it should be possible to access and control the devices
+from the phone. So a nice webui should follow.
+
+* add auto tune by getting weather forecast: https://openweathermap.org/
+* add mobile-friendly webui
 
 ## Other resources
 
