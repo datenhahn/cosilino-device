@@ -45,7 +45,7 @@ NodeMCU breakout-board which makes using normal bread-board-connectors
 
 ## cosilino-device
 
-I built and flashed the firmware with the Arduino IDE. This folder contains the Android IDE ino-file for the device.
+I built and flashed the firmware with the Arduino IDE. This folder contains the Arduino IDE ino-file for the device.
 
 The device uses the WifiManager arduino lib (https://github.com/tzapu/WiFiManager).
 If it cannot connect to a Wifi all LEDs will be on. You then can
@@ -62,7 +62,7 @@ example for different ip:
 
 ### Anroid IDE plugins
 
-I screenshotted all plugins I installed (see doc/android_ide_plugins).
+I screenshotted all plugins I installed (see doc/arduino_ide_plugins).
 
 ### Material List
 
