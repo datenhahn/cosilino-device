@@ -1,6 +1,6 @@
 # Cosilino - Remote control Stiebel Eltron electronic heating applicances (ETS200-700) via MQTT
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: MIT](https://img.shields.io/badge/license-MIT-red.svg)](https://opensource.org/licenses/MIT)
 
 ## Introduction
 
